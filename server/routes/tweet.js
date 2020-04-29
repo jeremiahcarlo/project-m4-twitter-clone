@@ -16,7 +16,7 @@ const {
 } = require('./routes.helpers.js');
 
 const createTweet = (status, { isRetweet }) => {
-  const newTweetId = Math.random() * 10 ** 18;
+  const newTweetId = (Math.random() * 10 ** 18).toString();
   const timestamp = new Date().toISOString();
 
   let sharedTweetBasics = {
@@ -69,9 +69,7 @@ router.post('/api/tweet', (req, res) => {
  */
 router.put('/api/tweet/:tweetId/like', (req, res) => {
   const { like } = req.body;
-
   const tweet = data.tweets[req.params.tweetId];
-
   if (!tweet) {
     res.sendStatus(404);
     return;
@@ -83,8 +81,6 @@ router.put('/api/tweet/:tweetId/like', (req, res) => {
     });
     return;
   }
-
-  console.log(tweet);
 
   // Disallow "repeat" requests (eg trying to like an already-liked tweet).
   const currentlyLiked = tweet.likedBy.includes(CURRENT_USER_HANDLE);
@@ -101,7 +97,7 @@ router.put('/api/tweet/:tweetId/like', (req, res) => {
     tweet.likedBy.push(CURRENT_USER_HANDLE);
   } else {
     tweet.likedBy = data.tweets[req.params.tweetId].likedBy.filter(
-      handle => handle !== CURRENT_USER_HANDLE
+      (handle) => handle !== CURRENT_USER_HANDLE
     );
   }
 
@@ -114,7 +110,6 @@ router.put('/api/tweet/:tweetId/retweet', (req, res) => {
   const { retweet } = req.body;
 
   const tweet = data.tweets[req.params.tweetId];
-
   if (!tweet) {
     res.sendStatus(404);
     return;
@@ -140,18 +135,16 @@ router.put('/api/tweet/:tweetId/retweet', (req, res) => {
 
   if (retweet) {
     tweet.retweetedBy.push(CURRENT_USER_HANDLE);
-
     const retweet = createTweet(null, { isRetweet: true });
     retweet.retweetOf = req.params.tweetId;
-
     data.tweets[retweet.id] = retweet;
   } else {
     tweet.retweetedBy = tweet.retweetedBy.filter(
-      handle => handle !== CURRENT_USER_HANDLE
+      (handle) => handle !== CURRENT_USER_HANDLE
     );
 
     // HACK: finding the retweet is so so so not scalable.
-    const retweet = Object.values(data.tweets).find(tweet => {
+    const retweet = Object.values(data.tweets).find((tweet) => {
       return (
         tweet.retweetOf === req.params.tweetId &&
         tweet.authorHandle === CURRENT_USER_HANDLE
